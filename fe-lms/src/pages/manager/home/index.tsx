@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { Courses } from "./Courses";
 import { Students } from "./Students";
+import { Courses } from "./Courses";
 
-export const ManagerHome = () => {
+export const ManagerHomePage = () => {
   return (
     <>
       {" "}
