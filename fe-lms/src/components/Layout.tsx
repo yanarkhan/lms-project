@@ -2,9 +2,12 @@ import { Outlet, useMatch } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 
-export const LayoutDashboard = () => {
+interface LayoutDashboardProps {
+  isAdmin?: boolean; 
+}
+
+export const LayoutDashboard = ({ isAdmin = true }: LayoutDashboardProps) => { // Menerima prop isAdmin dari router.
   const isPreviewPage = useMatch("/manager/courses/:id/preview");
-  console.log("is Preview Page", isPreviewPage);
 
   return (
     <>
@@ -12,7 +15,7 @@ export const LayoutDashboard = () => {
         <Outlet />
       ) : (
         <section className="flex min-h-screen">
-          <Sidebar />
+          <Sidebar isAdmin={isAdmin}/>
           <main className="flex flex-col flex-1 gap-[30px] p-[30px] ml-[290px]">
             <Header />
             <Outlet />
