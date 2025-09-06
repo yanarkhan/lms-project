@@ -1,5 +1,4 @@
-// src/controllers/globalController.ts
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 export const helloWorld = async (
   req: Request,

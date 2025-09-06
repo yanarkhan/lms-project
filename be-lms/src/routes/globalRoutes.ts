@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import { helloWorld } from "../controller/globalController";
 import { validateRequest } from "../middleware/validateRequest";
 import { exampleSchema } from "../utils/schema";

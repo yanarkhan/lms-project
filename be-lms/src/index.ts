@@ -1,12 +1,17 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import globalRoutes from "./routes/globalRoutes";
+import authRoutes from "./routes/authRoutes";
+import connectDB from "./utils/database";
 
 dotenv.config();
+// --- KONEKSI DATABASE ---
+connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = Number(process.env.PORT) || 8000;
 
 // Middleware
 app.use(express.json()); // Middleware untuk menguraikan JSON body dari request
@@ -16,6 +21,7 @@ app.use(express.static("public"));
 
 // Use Router
 app.use("/api", globalRoutes);
+app.use("/api", authRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("API is running with TypeScript and Express!");
