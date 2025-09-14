@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
-import Transaction from "../models/transactionModel";
-import { PaymentWebhookInput } from "../utils/schema";
 import { MongoError } from "mongodb";
+import Transaction from "../models/transactionModel";
+import type { PaymentWebhookInput } from "../utils/schema";
 
 export const handlePayment = async (
   req: Request<{}, {}, PaymentWebhookInput>,
@@ -9,47 +9,61 @@ export const handlePayment = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { order_id, transaction_status } = req.body;
+    const { order_id, transaction_status, fraud_status } = req.body;
 
-    let newStatus: string;
+    let newStatus: "pending" | "success" | "failed";
 
     switch (transaction_status) {
-      case "capture":
       case "settlement":
         newStatus = "success";
         break;
+
+      case "capture":
+        newStatus = fraud_status === "accept" ? "success" : "pending";
+        break;
+
       case "deny":
       case "expire":
       case "cancel":
         newStatus = "failed";
         break;
-      case "pending": // case untuk pending
+
+      // "pending", "refund", "partial_refund", "chargeback", "authorize", dll
       default:
-        res.status(200).json({ message: "No action needed for this status." });
-        return;
+        newStatus = "pending";
+        break;
     }
 
-    // update status transaksi di database
-    const updatedTransaction = await Transaction.findByIdAndUpdate(
-      order_id,
-      { status: newStatus },
-      { new: true } 
-    );
-
-    if (!updatedTransaction) {
+    const transactionDoc = await Transaction.findById(order_id);
+    if (!transactionDoc) {
       res.status(404).json({ message: "Transaction not found." });
       return;
     }
 
+    if (transactionDoc.status === "success" && newStatus !== "success") {
+      res.status(200).json({
+        ok: true,
+        order_id,
+        status: transactionDoc.status,
+      });
+      return;
+    }
+
+    if (transactionDoc.status !== newStatus) {
+      transactionDoc.status = newStatus;
+      await transactionDoc.save();
+    }
+
     res.status(200).json({
-      message: "Handle Payment Success",
-      data: updatedTransaction,
+      ok: true,
+      order_id,
+      status: transactionDoc.status,
     });
-  } catch (error) {
-    if (error instanceof MongoError) {
+  } catch (err) {
+    if (err instanceof MongoError) {
       res.status(500).json({ message: "Database Error." });
     } else {
-      next(error);
+      next(err);
     }
   }
 };

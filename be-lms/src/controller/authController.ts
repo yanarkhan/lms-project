@@ -4,7 +4,6 @@ import { MongoError } from "mongodb";
 import User from "../models/userModel";
 import Transaction from "../models/transactionModel";
 import { SignUpInput } from "../utils/schema";
-import { Types } from "mongoose";
 
 export const signUpAction = async (
   req: Request<{}, {}, SignUpInput>,
@@ -23,7 +22,6 @@ export const signUpAction = async (
     }
 
     const authHeader = Buffer.from(`${serverKey}:`).toString("base64");
-
     const hashPassword = await bcrypt.hash(password, 12);
 
     const user = new User({
@@ -39,7 +37,7 @@ export const signUpAction = async (
       price: 280000,
     });
 
-    const orderId = (transaction._id as Types.ObjectId).toString();
+    const orderId = transaction._id.toString();
 
     const body = {
       transaction_details: {

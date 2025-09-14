@@ -1,7 +1,8 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface ITransaction extends Document {
-  user: Types.ObjectId; 
+  _id: Types.ObjectId;
+  user: Types.ObjectId;
   price: number;
   status: "pending" | "success" | "failed";
   createdAt: Date;
@@ -13,6 +14,7 @@ const TransactionModel: Schema = new mongoose.Schema(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     price: {
       type: Number,

@@ -27,6 +27,7 @@ export const paymentWebhookSchema = z.object({
   status_code: z.string(),
   gross_amount: z.string(), // dari midtrans ngirimnya as a string
   signature_key: z.string(),
+  fraud_status: z.enum(["accept", "challenge", "deny"]).optional(),
 });
 
 export type ExampleInput = z.infer<typeof exampleSchema>;
