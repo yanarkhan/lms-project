@@ -5,6 +5,7 @@ import cors from "cors";
 import globalRoutes from "./routes/globalRoutes";
 import authRoutes from "./routes/authRoutes";
 import connectDB from "./utils/database";
+import paymentRoutes from "./routes/paymentRoutes";
 
 dotenv.config();
 // --- KONEKSI DATABASE ---
@@ -22,6 +23,7 @@ app.use(express.static("public"));
 // Use Router
 app.use("/api", globalRoutes);
 app.use("/api", authRoutes);
+app.use("/api", paymentRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("API is running with TypeScript and Express!");
