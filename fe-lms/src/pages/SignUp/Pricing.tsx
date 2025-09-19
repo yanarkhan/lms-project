@@ -1,7 +1,62 @@
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import { type SignUpFormValues } from "../../utils/ZodSchema";
+import { useMutation } from "@tanstack/react-query";
+import {
+  postSignUp,
+  type PostSignUpResponse,
+} from "../../services/AuthService";
+import { AxiosError } from "axios";
+import { useState } from "react";
 
-export const Pricing = () => {
+interface PricingProps {
+  data: SignUpFormValues | null;
+}
+
+export const Pricing = ({ data }: PricingProps) => {
+  const [error, setError] = useState<string | null>(null);
+
+  const { isPending, mutateAsync } = useMutation<
+    PostSignUpResponse,
+    AxiosError,
+    SignUpFormValues
+  >({
+    mutationFn: postSignUp,
+    retry: 0,
+  });
+
+  const submitData = async () => {
+    setError(null);
+
+    if (!data) {
+      setError("Form data not found.");
+      return;
+    }
+
+    try {
+      const result = await mutateAsync(data);
+      console.debug("postSignUp result:", result);
+
+      const { midtrans_payment_url } = result;
+
+      if (!midtrans_payment_url) {
+        throw new Error("Payment URL missing in API response.");
+      }
+      window.location.replace(midtrans_payment_url);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        if (err.response?.status === 409) {
+          setError(
+            "Email yang Anda masukkan sudah terdaftar. Silakan gunakan email lain."
+          );
+        } else {
+          setError("Terjadi kesalahan. Silakan coba lagi.");
+        }
+      }
+      console.error(err);
+    }
+  };
+
   return (
     <section className="relative flex flex-col flex-1 p-[10px]">
       <div className="absolute w-[calc(100%-20px)] min-h-[calc(100vh-20px)] h-[calc(100%-20px)] bg-[#060A23] -z-10 rounded-[20px]">
@@ -156,13 +211,19 @@ export const Pricing = () => {
           </div>
           <hr className="border-[#262A56]" />
           <div className="flex flex-col gap-3">
-            <Link to="#">
+            {error && (
+              <p role="alert" className="text-red-500 text-sm text-center">
+                {error}
+              </p>
+            )}
+
+            <button type="button" onClick={submitData} disabled={isPending}>
               <div className="flex items-center justify-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#662FFF] border-[#8661EE] shadow-[-10px_-6px_10px_0_#7F33FF_inset]">
                 <span className="font-semibold text-white">
-                  Choose This Plan
+                  {isPending ? "Loading..." : "Choose This Plan"}
                 </span>
               </div>
-            </Link>
+            </button>
             <Link to="#">
               <div className="flex items-center justify-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
                 <span className="font-semibold text-white">
