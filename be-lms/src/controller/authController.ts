@@ -3,7 +3,9 @@ import bcrypt from "bcrypt";
 import { MongoError } from "mongodb";
 import User from "../models/userModel";
 import Transaction from "../models/transactionModel";
-import { SignUpInput } from "../utils/schema";
+import { SignInInput, SignUpInput } from "../utils/schema";
+import jwt from "jsonwebtoken";
+import { Types } from "mongoose";
 
 export const signUpAction = async (
   req: Request<{}, {}, SignUpInput>,
@@ -79,5 +81,78 @@ export const signUpAction = async (
     } else {
       next(error);
     }
+  }
+};
+
+export const signInAction = async (
+  req: Request<{}, {}, SignInInput>,
+  res: Response
+): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+
+    const existingUser = await User.findOne({ email }).exec();
+    if (!existingUser) {
+      res.status(404).json({
+        message: "Email not registered",
+      });
+      return;
+    }
+
+    const comparePassword = bcrypt.compareSync(password, existingUser.password);
+    if (!comparePassword) {
+      res.status(401).json({
+        message: "Email or password incorrect",
+      });
+      return;
+    }
+
+    if (existingUser.role !== "student") {
+      const isValidUser = await Transaction.findOne({
+        user: existingUser._id,
+        status: "success",
+      });
+
+      if (!isValidUser) {
+        res.status(403).json({
+          message: "User not verified! Please complete your payment.",
+        });
+      }
+      return;
+    }
+
+    const secret = process.env.SECRET_KEY_JWT;
+    if (!secret) {
+      res.status(500).json({
+        message: "JWT secret key not configured.",
+      });
+      return;
+    }
+
+    const token = jwt.sign(
+      {
+        id: (existingUser._id as Types.ObjectId).toString(),
+        role: existingUser.role,
+      },
+      secret,
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({
+      message: "User logged in successfully",
+      data: {
+        name: existingUser.name,
+        email: existingUser.email,
+        token,
+        role: existingUser.role,
+      },
+    });
+    return;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+    return;
   }
 };

@@ -10,6 +10,8 @@ export const signUpSchema = z.object({
   password: z.string().min(5, "Password must be at least 5 characters"),
 });
 
+export const signInSchema = signUpSchema.omit({name: true})
+
 export const paymentWebhookSchema = z.object({
   order_id: z.string(),
   transaction_status: z.enum([
@@ -33,3 +35,4 @@ export const paymentWebhookSchema = z.object({
 export type ExampleInput = z.infer<typeof exampleSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type PaymentWebhookInput = z.infer<typeof paymentWebhookSchema>;
+export type SignInInput = z.infer<typeof signInSchema>;
