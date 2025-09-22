@@ -117,8 +117,8 @@ export const signInAction = async (
         res.status(403).json({
           message: "User not verified! Please complete your payment.",
         });
+        return;
       }
-      return;
     }
 
     const secret = process.env.SECRET_KEY_JWT;
