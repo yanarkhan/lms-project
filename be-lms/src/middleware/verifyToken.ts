@@ -1,15 +1,15 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
+import { Types } from "mongoose";
 import User from "../models/userModel";
 
-interface CustomJwtPayload extends JwtPayload {
-  data?: {
-    id?: string;
-  };
-}
+type TokenPayload = JwtPayload & {
+  id?: string;
+  role?: "manager" | "student";
+  data?: { id?: string };
+};
 
-export const protect = async (
+export const verifyToken = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -34,10 +34,10 @@ export const protect = async (
   token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, secretKey) as CustomJwtPayload;
+    const decoded = jwt.verify(token, secretKey) as TokenPayload;
 
-    const userId = decoded?.data?.id;
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    const userId = decoded?.id;
+    if (!userId || !Types.ObjectId.isValid(userId)) {
       res
         .status(401)
         .json({ message: "Not authorized, invalid token or token expired." });

@@ -7,7 +7,7 @@ export interface ICourse extends Document {
   category: Types.ObjectId;
   tagline: string;
   description: string;
-  students: Types.ObjectId;
+  students: Types.ObjectId[];
   manager: Types.ObjectId;
   details: Types.ObjectId[];
 }
@@ -33,10 +33,12 @@ const courseModel: Schema<ICourse> = new Schema({
     type: String,
     required: true,
   },
-  students: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-  },
+  students: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   manager: {
     type: Schema.Types.ObjectId,
     ref: "User",
