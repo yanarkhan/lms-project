@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IUser extends Document {
   name: string;
@@ -6,37 +6,47 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: "manager" | "student";
+  courses: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const UserModel: Schema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
+const UserModel: Schema<IUser> = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    photo: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["manager", "student"],
+      default: "manager",
+    },
+    courses: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Course",
+      },
+    ],
   },
-  photo: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    enum: ["manager", "student"],
-    default: "manager",
-  },
-});
+  { timestamps: true }
+);
 
 const User = mongoose.model<IUser>("User", UserModel);
 

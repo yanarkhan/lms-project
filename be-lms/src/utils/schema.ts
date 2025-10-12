@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { z } from "zod";
 
 export const exampleSchema = z.object({
@@ -10,7 +11,7 @@ export const signUpSchema = z.object({
   password: z.string().min(5, "Password must be at least 5 characters"),
 });
 
-export const signInSchema = signUpSchema.omit({name: true})
+export const signInSchema = signUpSchema.omit({ name: true });
 
 export const paymentWebhookSchema = z.object({
   order_id: z.string(),
@@ -32,7 +33,15 @@ export const paymentWebhookSchema = z.object({
   fraud_status: z.enum(["accept", "challenge", "deny"]).optional(),
 });
 
+export const mutateCourseSchema = z.object({
+  name: z.string().min(5, "Name must be at least 5 characters"),
+  categoryId: z.string().min(1, "Category ID is required").refine((v) => Types.ObjectId.isValid(v), "Invalid category id format"),
+  tagline: z.string().min(10, "Tagline must be at least 10 characters"),
+  description: z.string().min(20, "Description must be at least 20 characters"),
+});
+
 export type ExampleInput = z.infer<typeof exampleSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type PaymentWebhookInput = z.infer<typeof paymentWebhookSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
+export type MutateCourseInput = z.infer<typeof mutateCourseSchema>;
