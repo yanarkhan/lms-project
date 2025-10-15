@@ -1,5 +1,10 @@
 import express from "express";
-import { getCourses, postCourse } from "../controller/courseController";
+import {
+  deleteCourse,
+  getCourses,
+  postCourse,
+  updateCourse,
+} from "../controller/courseController";
 import { verifyToken } from "../middleware/verifyToken";
 import { uploadCourseThumbnail } from "../utils/multer";
 
@@ -13,5 +18,14 @@ courseRoutes.post(
   uploadCourseThumbnail.single("thumbnail"),
   postCourse
 );
+
+courseRoutes.put(
+  "/courses/:id",
+  verifyToken,
+  uploadCourseThumbnail.single("thumbnail"),
+  updateCourse
+);
+
+courseRoutes.delete("/courses/:id", verifyToken, deleteCourse);
 
 export default courseRoutes;
