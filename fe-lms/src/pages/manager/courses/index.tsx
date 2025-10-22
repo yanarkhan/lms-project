@@ -1,7 +1,13 @@
-import { Link } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import { CardCourses } from "./Card";
+import {
+  CourseItem,
+  GetCoursesResponse,
+} from "../../../services/CourseService";
 
 export const ManageCoursePage = () => {
+  const coursesResponse = useLoaderData() as GetCoursesResponse;
+
   return (
     <>
       <header className="flex items-center justify-between gap-[30px]">
@@ -32,9 +38,22 @@ export const ManageCoursePage = () => {
         id="CourseList"
         className="flex flex-col w-full rounded-[30px] p-[30px] gap-[30px] bg-[#F8FAFB]"
       >
-        <CardCourses />
-        <CardCourses />
-        <CardCourses />
+        {coursesResponse?.data?.length > 0 ? (
+          coursesResponse.data.map((item: CourseItem) => (
+            <CardCourses
+              key={item._id}
+              category={item.category.name}
+              id={item._id}
+              imageUrl={item.thumbnail_url}
+              name={item.name}
+              totalStudents={item.total_students}
+            />
+          ))
+        ) : (
+          <p className="text-center text-[#838C9D]">
+            You haven't created any courses yet.
+          </p>
+        )}
         {/* <div id="Pagination" className="flex items-center gap-3">
           <button type="button" className="flex shrink-0 w-9 h-9 rounded-full items-center justify-center text-center transition-all duration-300 hover:bg-[#662FFF] hover:text-white hover:border-0 bg-[#662FFF] text-white">
             <span className="font-semibold text-sm leading-[21px]">1</span>

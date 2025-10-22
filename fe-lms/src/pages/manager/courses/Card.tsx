@@ -1,19 +1,19 @@
 import { Link } from "react-router-dom";
 
-type CardCoursesProps = {
-  id?: number;
-  imageUrl?: string;
-  name?: string;
-  totalStudents?: string;
-  category?: string;
-};
+interface CardCoursesProps {
+  id: string;
+  imageUrl: string;
+  name: string;
+  totalStudents: number;
+  category: string;
+}
 
 export const CardCourses = ({
-  id = 1,
-  imageUrl = "/assets/images/thumbnails/th-1.png",
-  name = "Responsive Design Triclorem Lorem, ipsum dolor.",
-  totalStudents = "554",
-  category = "Programming",
+  id,
+  imageUrl,
+  name,
+  totalStudents,
+  category,
 }: CardCoursesProps) => {
   return (
     <div className="card flex items-center gap-5">

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, redirect } from "react-router-dom";
 import { ManagerHomePage } from "../pages/manager/home";
 import { SignInPage } from "../pages/SignIn";
 import { SignUpPage } from "../pages/SignUp";
@@ -11,6 +11,9 @@ import { ManageContentCreatePage } from "../pages/manager/courseContentCreate";
 import ManageCoursePreviewPage from "../pages/manager/coursePreview";
 import ManageStudentsPage from "../pages/manager/students";
 import StudentPage from "../pages/student/studentOverview";
+import { MANAGER_SESSION } from "../utils/Const";
+import { getSession, UserSession } from "../utils/session";
+import { getCourses, GetCoursesResponse } from "../services/CourseService";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +36,14 @@ export const router = createBrowserRouter([
   },
   {
     path: "/manager",
+    id: MANAGER_SESSION,
+    loader: async (): Promise<UserSession> => {
+      const session = getSession();
+      if (!session || session.role !== "manager") {
+        throw redirect("/manager/sign-in");
+      }
+      return session;
+    },
     element: <LayoutDashboard />,
     children: [
       {
@@ -41,6 +52,10 @@ export const router = createBrowserRouter([
       },
       {
         path: "/manager/courses",
+        loader: async (): Promise<GetCoursesResponse> => {
+          const data = await getCourses();
+          return data;
+        },
         element: <ManageCoursePage />,
       },
       {

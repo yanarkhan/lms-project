@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { postSignIn, type PostSignInData } from "../../services/AuthService";
 import type { AxiosError } from "axios";
-import { STORAGE_KEY } from "../../utils/Const";
-import secureLocalStorage from "react-secure-storage";
+import { setSession } from "../../utils/session";
+import apiInstance from "../../utils/Axios";
 
 export const SignInPage = () => {
   const navigate = useNavigate();
@@ -29,11 +29,16 @@ export const SignInPage = () => {
 
   const onSubmit = async (form: SignInFormValues) => {
     try {
-      const res = await mutateAsync(form);
+      const sessionData = await mutateAsync(form);
+      setSession(sessionData);
+      apiInstance.defaults.headers.common.Authorization = `Bearer ${sessionData.token}`;
 
-      secureLocalStorage.setItem(STORAGE_KEY, res);
-
-      navigate(res.role === "manager" ? "/manager" : "/student");
+      navigate(
+        sessionData.role === "manager" ? "/manager/courses" : "/student",
+        {
+          replace: true,
+        }
+      );
     } catch (err) {
       const ax = err as AxiosError<{ message?: string }>;
 
