@@ -1,6 +1,7 @@
 import express from "express";
 import {
   deleteCourse,
+  getCategories,
   getCourses,
   postCourse,
   updateCourse,
@@ -11,6 +12,7 @@ import { uploadCourseThumbnail } from "../utils/multer";
 const courseRoutes = express.Router();
 
 courseRoutes.get("/courses", verifyToken, getCourses);
+courseRoutes.get("/categories", verifyToken, getCategories);
 
 courseRoutes.post(
   "/courses",

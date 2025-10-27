@@ -1,6 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
+import { CategoryItem, GetCategoriesResponse } from "../../../services/CourseService";
 
 export const ManageCreateCoursePage = () => {
+  const categoriesResponse = useLoaderData() as GetCategoriesResponse;
+  console.log(categoriesResponse);
+
   return (
     <>
       <header className="flex items-center justify-between gap-[30px]">
@@ -123,9 +127,11 @@ export const ManageCreateCoursePage = () => {
               <option value="" hidden>
                 Choose one category
               </option>
-              <option value="">test</option>
-              <option value="">test</option>
-              <option value="">test</option>
+              {categoriesResponse?.data?.map((item: CategoryItem) => (
+                <option key={item._id} value={item._id}>
+                  {item.name}
+                </option>
+              ))}
             </select>
             <img
               src="/assets/images/icons/arrow-down.svg"

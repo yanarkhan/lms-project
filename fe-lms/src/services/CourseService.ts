@@ -25,3 +25,20 @@ export const getCourses = async (): Promise<GetCoursesResponse> => {
   const { data } = await apiInstanceAuth.get<GetCoursesResponse>("/courses");
   return data;
 };
+
+export interface CategoryItem {
+  _id: string;
+  name: string;
+}
+
+export interface GetCategoriesResponse {
+  message: string;
+  data: CategoryItem[];
+}
+
+export const getCategories = async (): Promise<GetCategoriesResponse> => {
+  const { data } = await apiInstanceAuth.get<GetCategoriesResponse>(
+    "/categories"
+  );
+  return data;
+};

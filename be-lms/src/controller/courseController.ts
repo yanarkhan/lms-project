@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import Course from "../models/courseModel";
 import { mutateCourseSchema, MutateCourseInput } from "../utils/schema";
 import fs from "fs";
-import Category from "../models/categoryModel";
+import Category, { ICategory } from "../models/categoryModel";
 import User from "../models/userModel";
 import path from "path";
 
@@ -41,6 +41,25 @@ export const getCourses = async (
     res
       .status(200)
       .json({ message: "Get courses successfully", data: responseData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getCategories = async (
+  _req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const categories: ICategory[] = await Category.find()
+      .select("name _id")
+      .lean()
+      .exec();
+
+    res
+      .status(200)
+      .json({ message: "Get categories success", data: categories });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

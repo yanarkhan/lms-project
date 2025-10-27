@@ -13,7 +13,12 @@ import ManageStudentsPage from "../pages/manager/students";
 import StudentPage from "../pages/student/studentOverview";
 import { MANAGER_SESSION } from "../utils/Const";
 import { getSession, UserSession } from "../utils/session";
-import { getCourses, GetCoursesResponse } from "../services/CourseService";
+import {
+  getCategories,
+  GetCategoriesResponse,
+  getCourses,
+  GetCoursesResponse,
+} from "../services/CourseService";
 
 export const router = createBrowserRouter([
   {
@@ -60,6 +65,10 @@ export const router = createBrowserRouter([
       },
       {
         path: "/manager/courses/create",
+        loader: async (): Promise<GetCategoriesResponse> => {
+          const categories = await getCategories();
+          return categories;
+        },
         element: <ManageCreateCoursePage />,
       },
       {
