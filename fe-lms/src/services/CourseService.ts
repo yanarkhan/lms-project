@@ -1,4 +1,5 @@
 import { apiInstanceAuth } from "../utils/Axios";
+import { CreateCourseFormValues } from "../utils/ZodSchema";
 
 interface CourseCategory {
   name: string;
@@ -39,6 +40,33 @@ export interface GetCategoriesResponse {
 export const getCategories = async (): Promise<GetCategoriesResponse> => {
   const { data } = await apiInstanceAuth.get<GetCategoriesResponse>(
     "/categories"
+  );
+  return data;
+};
+
+const toFormData = (data: CreateCourseFormValues): FormData => {
+  const formData = new FormData();
+  formData.append("name", data.name);
+  formData.append("categoryId", data.categoryId);
+  formData.append("tagline", data.tagline);
+  formData.append("description", data.description);
+  formData.append("thumbnail", data.thumbnail); 
+  return formData;
+};
+
+export interface CreateCourseResponse {
+  message: string;
+  data: { _id: string };
+}
+
+export const createCourse = async (
+  payload: CreateCourseFormValues
+): Promise<CreateCourseResponse> => {
+  const formData = toFormData(payload);
+
+  const { data } = await apiInstanceAuth.post<CreateCourseResponse>(
+    "/courses",
+    formData
   );
   return data;
 };
