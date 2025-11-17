@@ -16,6 +16,7 @@ import { getSession, UserSession } from "../utils/session";
 import {
   getCategories,
   GetCategoriesResponse,
+  getCourseDetail,
   getCourses,
   GetCoursesResponse,
 } from "../services/CourseService";
@@ -65,15 +66,33 @@ export const router = createBrowserRouter([
       },
       {
         path: "/manager/courses/create",
-        loader: async (): Promise<GetCategoriesResponse> => {
+        loader: async (): Promise<{
+          categories: GetCategoriesResponse;
+          course: null;
+        }> => {
           const categories = await getCategories();
-          return categories;
+          return { categories, course: null };
         },
         element: <ManageCreateCoursePage />,
       },
       {
         path: "/manager/courses/:id",
         element: <ManageCourseDetailPage />,
+      },
+      {
+        path: "/manager/courses/edit/:id",
+        loader: async ({ params }) => {
+          if (!params.id) {
+            throw redirect("/manager/courses");
+          }
+
+          const [categories, courseDetail] = await Promise.all([
+            getCategories(),
+            getCourseDetail(params.id),
+          ]);
+          return { categories, course: courseDetail };
+        },
+        element: <ManageCreateCoursePage />,
       },
       {
         path: "/manager/courses/:id/create",

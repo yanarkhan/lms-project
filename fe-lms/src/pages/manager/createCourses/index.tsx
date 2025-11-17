@@ -1,27 +1,45 @@
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import {
   CategoryItem,
   createCourse,
   CreateCourseResponse,
   GetCategoriesResponse,
+  GetCourseDetailResponse,
+  updateCourse,
+  UpdateCourseResponse,
 } from "../../../services/CourseService";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
   CreateCourseFormValues,
   createCourseSchema,
+  UpdateCourseFormValues,
+  updateCourseSchema,
 } from "../../../utils/ZodSchema";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 
-export const ManageCreateCoursePage = () => {
-  const categoriesResponse = useLoaderData() as GetCategoriesResponse;
-  const navigate = useNavigate();
+type LoaderData = {
+  categories: GetCategoriesResponse;
+  course: GetCourseDetailResponse | null;
+};
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+type FormValues = CreateCourseFormValues | UpdateCourseFormValues;
+
+export const ManageCreateCoursePage = () => {
+  const { categories, course } = useLoaderData() as LoaderData;
+  const navigate = useNavigate();
+  const { id: courseId } = useParams<{ id: string }>();
+
+  const isEditMode = !!course;
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    isEditMode ? course.data.thumbnail_url : null
+  );
   const inputFileRef = useRef<HTMLInputElement>(null);
 
+  /* RHF */
   const {
     register,
     handleSubmit,
@@ -29,11 +47,20 @@ export const ManageCreateCoursePage = () => {
     setValue,
     resetField,
     setError,
-  } = useForm<CreateCourseFormValues>({
-    resolver: zodResolver(createCourseSchema),
+  } = useForm<FormValues>({
+    resolver: zodResolver(isEditMode ? updateCourseSchema : createCourseSchema),
+    defaultValues: isEditMode
+      ? {
+          name: course.data.name,
+          tagline: course.data.tagline,
+          description: course.data.description,
+          categoryId: course.data.category._id,
+        }
+      : {},
   });
 
-  const { isPending, mutateAsync } = useMutation<
+  /* React Query Mutations */
+  const { isPending: isCreating, mutateAsync: createMutate } = useMutation<
     CreateCourseResponse,
     AxiosError<{ message?: string }>,
     CreateCourseFormValues
@@ -41,19 +68,38 @@ export const ManageCreateCoursePage = () => {
     mutationFn: (formValues) => createCourse(formValues),
   });
 
-  const onSubmit: SubmitHandler<CreateCourseFormValues> = async (data) => {
+  const { isPending: isUpdating, mutateAsync: updateMutate } = useMutation<
+    UpdateCourseResponse,
+    AxiosError<{ message?: string }>,
+    { id: string; payload: UpdateCourseFormValues }
+  >({
+    mutationFn: ({ id, payload }) => updateCourse({ id, payload }),
+  });
+
+  const isPending = isCreating || isUpdating;
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
-      await mutateAsync(data);
+      if (isEditMode && courseId) {
+        await updateMutate({
+          id: courseId,
+          payload: data as UpdateCourseFormValues,
+        });
+      } else {
+        await createMutate(data as CreateCourseFormValues);
+      }
       navigate("/manager/courses", { replace: true });
     } catch (err) {
       const ax = err as AxiosError<{ message?: string }>;
-      const serverMsg = ax.response?.data?.message || "Course creation failed.";
+      const serverMsg =
+        ax.response?.data?.message ||
+        (isEditMode ? "Update failed." : "Creation failed.");
       setError("root", { type: "server", message: serverMsg });
-      console.error("Course creation failed:", err);
+      console.error("Form submission failed:", err);
     }
   };
 
-  // Handler untuk input file
+  // Handler Input File
   const handleThumbnailChange: React.ChangeEventHandler<HTMLInputElement> = (
     e
   ) => {
@@ -77,7 +123,9 @@ export const ManageCreateCoursePage = () => {
   // Cleanup preview URL
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
     };
   }, [previewUrl]);
 
@@ -86,9 +134,13 @@ export const ManageCreateCoursePage = () => {
       <header className="flex items-center justify-between gap-[30px]">
         <div>
           <h1 className="font-extrabold text-[28px] leading-[42px]">
-            New Course
+            {isEditMode ? "Edit Course" : "New Course"}
           </h1>
-          <p className="text-[#838C9D] mt-[1]">Create new future for company</p>
+          <p className="text-[#838C9D] mt-[1]">
+            {isEditMode
+              ? "Update your course details"
+              : "Create new future for company"}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -178,12 +230,12 @@ export const ManageCreateCoursePage = () => {
             )}
           </div>
           <input
-            ref={inputFileRef} 
+            ref={inputFileRef}
             type="file"
             id="thumbnail"
-            name="thumbnail" 
+            name="thumbnail"
             accept="image/png, image/jpeg, image/jpg, image/webp"
-            onChange={handleThumbnailChange} 
+            onChange={handleThumbnailChange}
             className="hidden"
           />
           <span className="error-message text-[#FF435A]">
@@ -234,7 +286,7 @@ export const ManageCreateCoursePage = () => {
               <option value="" hidden>
                 Choose one category
               </option>
-              {categoriesResponse?.data?.map((item: CategoryItem) => (
+              {categories?.data?.map((item: CategoryItem) => (
                 <option key={item._id} value={item._id}>
                   {item.name}
                 </option>
@@ -302,7 +354,13 @@ export const ManageCreateCoursePage = () => {
             disabled={isPending || isSubmitting}
             className="w-full rounded-full p-[14px_20px] font-semibold text-[#FFFFFF] bg-[#662FFF] text-nowrap"
           >
-            {isPending || isSubmitting ? "Creating..." : "Create Now"}
+            {isPending
+              ? isEditMode
+                ? "Updating..."
+                : "Creating..."
+              : isEditMode
+              ? "Update Course"
+              : "Create Now"}
           </button>
         </div>
       </form>

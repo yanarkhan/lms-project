@@ -5,6 +5,7 @@ import fs from "fs";
 import Category, { ICategory } from "../models/categoryModel";
 import User from "../models/userModel";
 import path from "path";
+import { Types } from "mongoose";
 
 export const getCourses = async (
   req: Request,
@@ -60,6 +61,50 @@ export const getCategories = async (
     res
       .status(200)
       .json({ message: "Get categories success", data: categories });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getCourseById = async (
+  req: Request<{ id: string }>,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!Types.ObjectId.isValid(id)) {
+      res.status(400).json({ message: "Invalid course ID format" });
+      return;
+    }
+
+    const course = await Course.findById(id)
+      .populate<{ category: ICategory }>({
+        path: "category",
+        select: "_id name",
+      })
+      .exec();
+    if (!course) {
+      res.status(404).json({ message: "Course not found" });
+      return;
+    }
+    if (course.manager.toString() !== req.user?._id) {
+      res.status(403).json({
+        message: "Forbidden: You are not authorized to view this course",
+      });
+      return;
+    }
+
+    const baseUrl =
+      process.env.APP_URL ?? `${req.protocol}://${req.get("host")}`;
+    const responseData = {
+      ...course.toObject(),
+      thumbnail_url: `${baseUrl}${course.thumbnail}`,
+    };
+
+    res
+      .status(200)
+      .json({ message: "Get Course Detail success", data: responseData });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

@@ -2,6 +2,7 @@ import express from "express";
 import {
   deleteCourse,
   getCategories,
+  getCourseById,
   getCourses,
   postCourse,
   updateCourse,
@@ -13,6 +14,7 @@ const courseRoutes = express.Router();
 
 courseRoutes.get("/courses", verifyToken, getCourses);
 courseRoutes.get("/categories", verifyToken, getCategories);
+courseRoutes.get("/courses/:id", verifyToken, getCourseById);
 
 courseRoutes.post(
   "/courses",

@@ -1,4 +1,10 @@
-import { Link } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { Link, useRevalidator } from "react-router-dom";
+import {
+  deleteCourse,
+  DeleteCourseResponse,
+} from "../../../services/CourseService";
+import { AxiosError } from "axios";
 
 interface CardCoursesProps {
   id: string;
@@ -15,6 +21,32 @@ export const CardCourses = ({
   totalStudents,
   category,
 }: CardCoursesProps) => {
+  const revalidator = useRevalidator();
+
+  // Setup mutation untuk delete
+  const { mutateAsync, isPending } = useMutation<
+    DeleteCourseResponse,
+    AxiosError<{ message?: string }>,
+    void
+  >({
+    mutationFn: () => deleteCourse(id),
+  });
+
+  // Handler Delete
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete course "${name}"?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await mutateAsync();
+      revalidator.revalidate();
+    } catch (error) {
+      console.error("Failed to delete course:", error);
+    }
+  };
+
   return (
     <div className="card flex items-center gap-5">
       <div className="flex shrink-0 w-[140px] h-[110px] rounded-[20px] bg-[#D9D9D9] overflow-hidden">
@@ -35,7 +67,7 @@ export const CardCourses = ({
               className="w-5 h-5"
               alt="icon"
             />
-            <p className="text-[#838C9D]">{totalStudents}s</p>
+            <p className="text-[#838C9D]">{totalStudents} Students</p>
           </div>
           <div className="flex items-center gap-[6px] mt-[6px]">
             <img
@@ -54,6 +86,14 @@ export const CardCourses = ({
         >
           Manage
         </Link>
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={isPending}
+          className="w-fit rounded-full border bg-red-500 text-white p-[14px_20px] font-semibold text-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isPending ? "Deleting..." : "Delete"}
+        </button>
       </div>
     </div>
   );

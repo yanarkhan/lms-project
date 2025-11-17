@@ -29,6 +29,11 @@ export const createCourseSchema = z.object({
     ),
 });
 
+export const updateCourseSchema = createCourseSchema.partial({
+  thumbnail: true, 
+});
+
 export type SignUpFormValues = z.infer<typeof signUpSchema>;
 export type SignInFormValues = z.infer<typeof signInSchema>;
 export type CreateCourseFormValues = z.infer<typeof createCourseSchema>;
+export type UpdateCourseFormValues = z.infer<typeof updateCourseSchema>;
