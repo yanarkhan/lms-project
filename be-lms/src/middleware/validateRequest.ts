@@ -1,8 +1,8 @@
-import { AnyZodObject, ZodError } from "zod";
+import { ZodError, ZodSchema } from "zod";
 import type { Request, Response, NextFunction } from "express";
 
 export const validateRequest =
-  (schema: AnyZodObject) =>
+  (schema: ZodSchema) =>
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // 1. Validasi body request
