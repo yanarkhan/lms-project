@@ -1,10 +1,14 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
+import { CourseDetailData } from "../../../services/CourseService";
 import { TableContent } from "./TableContent";
 
-export default function ManageCourseDetailPage() {
-  const { id } = useParams<{ id: string }>();
+const ManageCourseDetailPage = () => {
+  const course = useLoaderData() as CourseDetailData;
+  const courseId = course._id;
+
   return (
     <>
+      {/* Breadcrumb */}
       <div
         id="Breadcrumb"
         className="flex items-center gap-5 *:after:content-['/'] *:after:ml-5"
@@ -19,35 +23,38 @@ export default function ManageCourseDetailPage() {
           Details
         </span>
       </div>
+
+      {/* Header */}
       <header className="flex items-center justify-between gap-[30px]">
         <div>
           <h1 className="font-extrabold text-[28px] leading-[42px]">
-            Mastering React TypeScript 7 <br />
-            Website Development
+            {course.name}
           </h1>
         </div>
         <div className="flex items-center gap-3">
           <Link
-            to={`/manager/courses/edit/${id}`}
+            to={`/manager/courses/edit/${courseId}`}
             className="w-fit rounded-full border border-[#060A23] p-[14px_20px] font-semibold text-nowrap"
           >
             Edit Course
           </Link>
           <Link
-            to="/manager/courses/1/preview"
+            to={`/manager/courses/${courseId}/preview`}
             className="w-fit rounded-full p-[14px_20px] font-semibold text-[#FFFFFF] bg-[#662FFF] text-nowrap"
           >
             Preview
           </Link>
         </div>
       </header>
+
+      {/* Course Info */}
       <section id="CourseInfo" className="flex gap-[50px]">
         <div
           id="Thumbnail"
           className="flex shrink-0 w-[480px] h-[250px] rounded-[20px] bg-[#D9D9D9] overflow-hidden"
         >
           <img
-            src="/assets/images/thumbnails/th-4.png"
+            src={course.thumbnail_url}
             className="w-full h-full object-cover"
             alt="thumbnail"
           />
@@ -59,7 +66,9 @@ export default function ManageCourseDetailPage() {
               className="w-8 h-8"
               alt="icon"
             />
-            <p className="font-semibold">12,489 Students</p>
+            <p className="font-semibold">
+              {course.students?.length ?? 0} Students
+            </p>
           </div>
           <div className="flex flex-col rounded-[20px] border border-[#CFDBEF] p-5 gap-4">
             <img
@@ -67,7 +76,7 @@ export default function ManageCourseDetailPage() {
               className="w-8 h-8"
               alt="icon"
             />
-            <p className="font-semibold">Programming</p>
+            <p className="font-semibold">{course.category?.name ?? "-"}</p>
           </div>
           <div className="flex flex-col rounded-[20px] border border-[#CFDBEF] p-5 gap-4">
             <img
@@ -75,7 +84,9 @@ export default function ManageCourseDetailPage() {
               className="w-8 h-8"
               alt="icon"
             />
-            <p className="font-semibold">873 Contents</p>
+            <p className="font-semibold">
+              {course.details?.length ?? 0} Contents
+            </p>
           </div>
           <div className="flex flex-col rounded-[20px] border border-[#CFDBEF] p-5 gap-4">
             <img
@@ -87,7 +98,14 @@ export default function ManageCourseDetailPage() {
           </div>
         </div>
       </section>
-      <TableContent />
+
+      {/* Table Content */}
+      <TableContent
+        details={course.details ?? []}
+        courseId={courseId}
+      />
     </>
   );
-}
+};
+
+export default ManageCourseDetailPage;

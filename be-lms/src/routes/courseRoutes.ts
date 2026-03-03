@@ -3,6 +3,7 @@ import {
   deleteContentCourse,
   deleteCourse,
   getCategories,
+  getContentById,
   getCourseById,
   getCourses,
   postContentCourse,
@@ -47,5 +48,8 @@ courseRoutes.put(
   updateContentCourse,
 );
 courseRoutes.delete("/courses/contents/:id", verifyToken, deleteContentCourse);
+
+
+courseRoutes.get("/courses/contents/:id", verifyToken, getContentById);
 
 export default courseRoutes;

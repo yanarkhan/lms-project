@@ -1,187 +1,100 @@
-import { Link } from "react-router-dom";
-import ContentText from "./contentText";
-import ContentVideo from "./contentVideo";
+import { useState } from "react";
+import { Link, useLoaderData } from "react-router-dom";
+import {
+  type CourseDetailPreviewData,
+  type CourseContentItemFull,
+} from "../../../services/CourseService";
+import { ContentText } from "./ContentText";
+import { ContentVideo } from "./ContentVideo";
 
-export default function ManageCoursePreviewPage() {
+const ManageCoursePreviewPage = () => {
+  const course = useLoaderData() as CourseDetailPreviewData;
+
+  const [activeContentId, setActiveContentId] = useState<string>(
+    course.details[0]?._id ?? "",
+  );
+
+  const activeContent: CourseContentItemFull | undefined =
+    course.details.find((c) => c._id === activeContentId) ?? course.details[0];
+
+  const handleNextContent = () => {
+    const currentIndex = course.details.findIndex(
+      (c) => c._id === activeContentId,
+    );
+    const nextContent = course.details[currentIndex + 1];
+    if (nextContent) {
+      setActiveContentId(nextContent._id);
+    }
+  };
+
+  const isLastContent =
+    course.details.findIndex((c) => c._id === activeContentId) ===
+    course.details.length - 1;
+
   return (
     <div className="flex min-h-screen">
+      {/* Sidebar */}
       <aside className="sidebar-container fixed h-[calc(100vh-20px)] w-full max-w-[330px] my-[10px] ml-[10px] bg-[#060A23] overflow-hidden flex flex-1 rounded-[20px]">
         <div className="scroll-container flex w-full overflow-y-scroll hide-scrollbar">
           <nav className="flex flex-col w-full h-fit p-[30px] gap-[30px] z-10">
             <Link
-              to="/manage-course"
+              to={`/manager/courses/${course._id}`}
               className="font-semibold text-white hover:underline"
             >
               <span>Back to Dashboard</span>
             </Link>
+
+            {/* Course info */}
             <div className="flex flex-col gap-4">
               <div className="flex shrink-0 w-[130px] h-[100px] rounded-[14px] bg-[#D9D9D9] overflow-hidden">
                 <img
-                  src="/assets/images/thumbnails/th-1.png"
+                  src={course.thumbnail_url}
                   className="w-full h-full object-cover"
                   alt="thumbnail"
                 />
               </div>
               <h2 className="font-bold text-xl leading-[34px] text-white">
-                Mastering React 18 Pro TypeScript Development
+                {course.name}
               </h2>
             </div>
-            <ul className="flex flex-col gap-4">
-              <li>
-                <Link to="/course-learning-text">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/note-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Persiapan fundamental
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-video.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/video-play-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Install figma plugins
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-text.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#662FFF] border-[#8661EE] shadow-[-10px_-6px_10px_0_#7F33FF_inset]">
-                    <img
-                      src="/assets/images/icons/note-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Pengenalan UI UX
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-text.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/note-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Mengapa UI mobil le...
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-video.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/video-play-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Bikin UI components
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-video.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/video-play-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Bikin UI components
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-text.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/note-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Persiapan fundamental
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-video.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/video-play-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Install figma plugins
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-text.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/note-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Persiapan fundamental
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-video.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/video-play-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Install figma plugins
-                    </span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link to="course-learning-finished.html">
-                  <div className="flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 hover:bg-[#662FFF] hover:border-[#8661EE] hover:shadow-[-10px_-6px_10px_0_#7F33FF_inset] bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset]">
-                    <img
-                      src="/assets/images/icons/tick-circle-white.svg"
-                      className="w-6 h-6"
-                      alt="icon"
-                    />
-                    <span className="w-full font-semibold text-white line-clamp-1 transition-all duration-300 hover:line-clamp-none">
-                      Finished
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            </ul>
+
+            {/* Content list */}
+            {course.details.length === 0 ? (
+              <p className="text-[#838C9D] text-sm">No content available.</p>
+            ) : (
+              <ul className="flex flex-col gap-4">
+                {course.details.map((content) => {
+                  const isActive = content._id === activeContentId;
+                  const iconSrc =
+                    content.type === "text"
+                      ? "/assets/images/icons/note-white.svg"
+                      : "/assets/images/icons/video-play-white.svg";
+
+                  return (
+                    <li key={content._id}>
+                      <button
+                        type="button"
+                        onClick={() => setActiveContentId(content._id)}
+                        className={`flex items-center gap-3 w-full rounded-full border p-[14px_20px] transition-all duration-300 text-left ${
+                          isActive
+                            ? "bg-[#662FFF] border-[#8661EE] shadow-[-10px_-6px_10px_0_#7F33FF_inset]"
+                            : "bg-[#070B24] border-[#24283E] shadow-[-10px_-6px_10px_0_#181A35_inset] hover:bg-[#662FFF] hover:border-[#8661EE]"
+                        }`}
+                      >
+                        <img
+                          src={iconSrc}
+                          className="w-6 h-6 shrink-0"
+                          alt={content.type}
+                        />
+                        <span className="w-full font-semibold text-white line-clamp-1">
+                          {content.title}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </nav>
         </div>
         <img
@@ -190,67 +103,33 @@ export default function ManageCoursePreviewPage() {
           alt="background"
         />
       </aside>
+
+      {/* Main Content */}
       <main className="flex flex-col flex-1 gap-[30px] p-[30px] ml-[340px]">
-        <div
-          id="TopBar"
-          className="flex items-center justify-between gap-[30px]"
-        >
-          <form
-            action=""
-            className="flex items-center w-full max-w-[450px] rounded-full border border-[#CFDBEF] gap-3 px-5 transition-all duration-300 focus-within:ring-2 focus-within:ring-[#662FFF]"
-          >
-            <input
-              type="text"
-              name="search"
-              id="search"
-              className="appearance-none outline-none w-full py-3 font-semibold placeholder:font-normal placeholder:text-[#838C9D]"
-              placeholder="Search course, student, other file..."
-            />
-            <img
-              src="/assets/images/icons/search-normal.svg"
-              className="w-6 h-6"
-              alt="icon"
-            />
-          </form>
-          <div className="relative flex items-center justify-end gap-[14px]">
-            <div className="text-right">
-              <p className="font-semibold">Masayoshi Kyo</p>
-              <p className="text-sm leading-[21px] text-[#838C9D]">Employee</p>
-            </div>
-            <button
-              type="button"
-              id="profileButton"
-              className="flex shrink-0 w-[50px] h-[50px] rounded-full overflow-hidden"
-            >
-              <img
-                src="/assets/images/photos/photo-3.png"
-                className="w-full h-full object-cover"
-                alt="profile photos"
-              />
-            </button>
-            <div id="ProfileDropdown" className="absolute top-full hidden">
-              <ul className="flex flex-col w-[200px] rounded-[20px] border border-[#CFDBEF] p-5 gap-4 bg-white mt-4">
-                <li className="font-semibold">
-                  <a href="#">My Account</a>
-                </li>
-                <li className="font-semibold">
-                  <a href="#">Subscriptions</a>
-                </li>
-                <li className="font-semibold">
-                  <a href="#">Settings</a>
-                </li>
-                <li className="font-semibold">
-                  <a href="/signin.html">Logout</a>
-                </li>
-              </ul>
-            </div>
+        {activeContent === undefined ? (
+          <div className="flex items-center justify-center h-40">
+            <p className="text-[#838C9D]">
+              Select a content item from the sidebar.
+            </p>
           </div>
-        </div>
-        <div className="relative flex flex-col gap-[26px]">
-          <ContentText />
-          <ContentVideo />
-        </div>
+        ) : activeContent.type === "text" ? (
+          <ContentText
+            title={activeContent.title}
+            text={activeContent.text ?? ""}
+            onNext={handleNextContent}
+            isLast={isLastContent}
+          />
+        ) : (
+          <ContentVideo
+            title={activeContent.title}
+            youtubeId={activeContent.youtubeId ?? ""}
+            onNext={handleNextContent}
+            isLast={isLastContent}
+          />
+        )}
       </main>
     </div>
   );
-}
+};
+
+export default ManageCoursePreviewPage;

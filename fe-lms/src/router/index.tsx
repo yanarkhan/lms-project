@@ -14,8 +14,12 @@ import StudentPage from "../pages/student/studentOverview";
 import { MANAGER_SESSION } from "../utils/Const";
 import { getSession, UserSession } from "../utils/session";
 import {
+  ContentData,
+  CourseDetailData,
+  CourseDetailPreviewData,
   getCategories,
   GetCategoriesResponse,
+  getContentDetail,
   getCourseDetail,
   getCourses,
   GetCoursesResponse,
@@ -77,6 +81,13 @@ export const router = createBrowserRouter([
       },
       {
         path: "/manager/courses/:id",
+        loader: async ({ params }): Promise<CourseDetailData> => {
+          if (!params.id) {
+            throw redirect("/manager/courses");
+          }
+          const response = await getCourseDetail(params.id);
+          return response.data;
+        },
         element: <ManageCourseDetailPage />,
       },
       {
@@ -99,7 +110,25 @@ export const router = createBrowserRouter([
         element: <ManageContentCreatePage />,
       },
       {
+        path: "/manager/courses/:id/edit/:contentId",
+        loader: async ({ params }): Promise<ContentData> => {
+          if (!params.contentId) {
+            throw redirect("/manager/courses");
+          }
+          const response = await getContentDetail(params.contentId);
+          return response.data;
+        },
+        element: <ManageContentCreatePage />,
+      },
+      {
         path: "/manager/courses/:id/preview",
+        loader: async ({ params }): Promise<CourseDetailPreviewData> => {
+          if (!params.id) {
+            throw redirect("/manager/courses");
+          }
+          const response = await getCourseDetail(params.id, true);
+          return response.data;
+        },
         element: <ManageCoursePreviewPage />,
       },
       {

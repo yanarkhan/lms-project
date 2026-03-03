@@ -4,7 +4,6 @@ import {
   mutateCourseSchema,
   MutateCourseInput,
   MutateContentInput,
-  mutateContentSchema,
 } from "../utils/schema";
 import fs from "fs";
 import Category, { ICategory } from "../models/categoryModel";
@@ -90,7 +89,7 @@ export const getCourseById = async (
     const course = await Course.findById(id)
       .populate<{ category: ICategory }>({
         path: "category",
-        select: "_id name",
+        select: "-_id name",
       })
       .populate({
         path: "details",
@@ -335,15 +334,7 @@ export const postContentCourse = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const parseResult = mutateContentSchema.safeParse(req.body);
-    if (!parseResult.success) {
-      const errorMessages = parseResult.error.issues.map((err) => err.message);
-      res
-        .status(400)
-        .json({ message: "Validation error", errors: errorMessages });
-      return;
-    }
-    const { title, type, courseId, youtubeId, text } = parseResult.data;
+    const { title, type, courseId, youtubeId, text } = req.body;
 
     const course = await Course.findById(courseId).exec();
     if (!course) {
@@ -376,7 +367,6 @@ export const postContentCourse = async (
       ).exec();
     } catch (updateError) {
       await CourseDetail.findByIdAndDelete(newContent._id).exec();
-
       console.error(
         "Failed to link content to course, rolling back:",
         updateError,
@@ -406,16 +396,7 @@ export const updateContentCourse = async (
       return;
     }
 
-    const parseResult = mutateContentSchema.safeParse(req.body);
-    if (!parseResult.success) {
-      const errorMessage = parseResult.error.issues.map((err) => err.message);
-      res
-        .status(400)
-        .json({ message: "Validation error", error: errorMessage });
-      return;
-    }
-
-    const { title, courseId, type, youtubeId, text } = parseResult.data;
+    const { title, courseId, type, youtubeId, text } = req.body;
     if (!Types.ObjectId.isValid(courseId)) {
       res.status(400).json({ message: "Invalid course ID format" });
       return;
@@ -425,6 +406,7 @@ export const updateContentCourse = async (
       Course.findById(courseId).exec(),
       CourseDetail.findById(id).exec(),
     ]);
+
     if (!targetCourse) {
       res.status(404).json({ message: "Target Course not found" });
       return;
@@ -467,12 +449,13 @@ export const updateContentCourse = async (
 
     const updatedContent = await CourseDetail.findByIdAndUpdate(
       id,
-      {
-        $set: updateData,
-        $unset: unsetData,
-      },
+      { $set: updateData, $unset: unsetData },
       { new: true, runValidators: true },
     ).exec();
+    if (!updatedContent) {
+      res.status(404).json({ message: "Content not found after update" });
+      return;
+    }
 
     res.status(200).json({
       message: "Content updated successfully",
@@ -516,6 +499,43 @@ export const deleteContentCourse = async (
     await CourseDetail.findByIdAndDelete(id).exec();
 
     res.status(200).json({ message: "Delete Content Success" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getContentById = async (
+  req: Request<{ id: string }>,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!Types.ObjectId.isValid(id)) {
+      res.status(400).json({ message: "Invalid content ID format" });
+      return;
+    }
+
+    const content = await CourseDetail.findById(id)
+      .populate<{ course: ICourse }>("course", "manager")
+      .lean()
+      .exec();
+
+    if (!content) {
+      res.status(404).json({ message: "Content not found" });
+      return;
+    }
+
+    if (content.course.manager.toString() !== req.user?._id) {
+      res.status(403).json({
+        message: "Forbidden: You are not authorized to view this content",
+      });
+      return;
+    }
+
+    res
+      .status(200)
+      .json({ message: "Get Content Detail success", data: content });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
