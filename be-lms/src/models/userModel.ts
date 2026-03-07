@@ -1,12 +1,14 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IUser extends Document {
+  _id: Types.ObjectId;
   name: string;
   photo: string;
   email: string;
   password: string;
   role: "manager" | "student";
   courses: Types.ObjectId[];
+  manager?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,7 +22,6 @@ const UserModel: Schema<IUser> = new Schema(
     },
     photo: {
       type: String,
-      required: true,
     },
     email: {
       type: String,
@@ -44,8 +45,12 @@ const UserModel: Schema<IUser> = new Schema(
         ref: "Course",
       },
     ],
+    manager: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const User = mongoose.model<IUser>("User", UserModel);

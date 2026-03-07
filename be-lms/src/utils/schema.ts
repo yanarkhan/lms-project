@@ -73,9 +73,22 @@ export const mutateContentSchema = z
     }
   });
 
+export const mutateStudentSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(5, "Password must be at least 5 characters"),
+});
+
+export const updateStudentSchema = mutateStudentSchema.partial({
+  password: true,
+});
+
 export type ExampleInput = z.infer<typeof exampleSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type PaymentWebhookInput = z.infer<typeof paymentWebhookSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type MutateCourseInput = z.infer<typeof mutateCourseSchema>;
 export type MutateContentInput = z.infer<typeof mutateContentSchema>;
+
+export type MutateStudentInput = z.infer<typeof mutateStudentSchema>;
+export type UpdateStudentInput = z.infer<typeof updateStudentSchema>;
