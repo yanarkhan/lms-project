@@ -24,6 +24,13 @@ import {
   getCourses,
   GetCoursesResponse,
 } from "../services/CourseService";
+import ManageStudentCreatePage from "../pages/manager/studentsCreate";
+import {
+  getStudentDetail,
+  getStudents,
+  StudentDetail,
+  StudentItem,
+} from "../services/StudentService";
 
 export const router = createBrowserRouter([
   {
@@ -133,7 +140,26 @@ export const router = createBrowserRouter([
       },
       {
         path: "/manager/students",
+        loader: async (): Promise<StudentItem[]> => {
+          const response = await getStudents();
+          return response.data;
+        },
         element: <ManageStudentsPage />,
+      },
+      {
+        path: "/manager/students/create",
+        element: <ManageStudentCreatePage />,
+      },
+      {
+        path: "/manager/students/edit/:id",
+        loader: async ({ params }): Promise<StudentDetail> => {
+          if (!params.id) {
+            throw redirect("/manager/students");
+          }
+          const response = await getStudentDetail(params.id);
+          return response.data;
+        },
+        element: <ManageStudentCreatePage />,
       },
     ],
   },

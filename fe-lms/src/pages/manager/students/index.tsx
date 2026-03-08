@@ -1,7 +1,10 @@
-import { Link } from "react-router-dom";
-import StudentItem from "./StudentItem";
+import { Link, useLoaderData } from "react-router-dom";
+import type { StudentItem } from "../../../services/StudentService";
+import { StudentItemCard } from "./StudentItem";
 
 export default function ManageStudentsPage() {
+  const students = useLoaderData() as StudentItem[];
+
   return (
     <>
       <header className="flex items-center justify-between gap-[30px]">
@@ -21,53 +24,27 @@ export default function ManageStudentsPage() {
             Import File
           </Link>
           <Link
-            to="/create-new-student.html"
+            to="/manager/students/create"
             className="w-fit rounded-full p-[14px_20px] font-semibold text-[#FFFFFF] bg-[#662FFF] text-nowrap"
           >
             Add Student
           </Link>
         </div>
       </header>
+
       <section
-        id="CourseList"
+        id="StudentList"
         className="flex flex-col w-full rounded-[30px] p-[30px] gap-[30px] bg-[#F8FAFB]"
       >
-        <StudentItem />
-        <StudentItem />
-        <StudentItem />
-
-        {/* <div id="Pagination" className="flex items-center gap-3">
-          <button
-            type="button"
-            className="flex shrink-0 w-9 h-9 rounded-full items-center justify-center text-center transition-all duration-300 hover:bg-[#662FFF] hover:text-white hover:border-0 bg-[#662FFF] text-white"
-          >
-            <span className="font-semibold text-sm leading-[21px]">1</span>
-          </button>
-          <button
-            type="button"
-            className="flex shrink-0 w-9 h-9 rounded-full items-center justify-center text-center transition-all duration-300 hover:bg-[#662FFF] hover:text-white hover:border-0 border border-[#060A23]"
-          >
-            <span className="font-semibold text-sm leading-[21px]">2</span>
-          </button>
-          <button
-            type="button"
-            className="flex shrink-0 w-9 h-9 rounded-full items-center justify-center text-center transition-all duration-300 hover:bg-[#662FFF] hover:text-white hover:border-0 border border-[#060A23]"
-          >
-            <span className="font-semibold text-sm leading-[21px]">3</span>
-          </button>
-          <button
-            type="button"
-            className="flex shrink-0 w-9 h-9 rounded-full items-center justify-center text-center transition-all duration-300 hover:bg-[#662FFF] hover:text-white hover:border-0 border border-[#060A23]"
-          >
-            <span className="font-semibold text-sm leading-[21px]">4</span>
-          </button>
-          <button
-            type="button"
-            className="flex shrink-0 w-9 h-9 rounded-full items-center justify-center text-center transition-all duration-300 hover:bg-[#662FFF] hover:text-white hover:border-0 border border-[#060A23]"
-          >
-            <span className="font-semibold text-sm leading-[21px]">5</span>
-          </button>
-        </div> */}
+        {students.length === 0 ? (
+          <p className="text-center text-[#838C9D] py-10">
+            No students yet. Start by adding your first student.
+          </p>
+        ) : (
+          students.map((student) => (
+            <StudentItemCard key={student._id} student={student} />
+          ))
+        )}
       </section>
     </>
   );
